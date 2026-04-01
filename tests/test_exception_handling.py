@@ -40,6 +40,15 @@ def create_mock_response(resp):
             },
             ValidationError,
         ),
+        (
+            {
+                "error": {
+                    "message": {"detail": "some nested error info"},
+                    "code": "GENERAL_API_ERROR",
+                }
+            },
+            CapellaConsoleClientError,
+        ),
     ],
 )
 def test_handle_error_response_and_raise(error_response, expected_error_class):
@@ -51,7 +60,10 @@ def test_handle_error_response_and_raise(error_response, expected_error_class):
         assert excinfo.value.message == error_response["error"]
         return
 
-    assert excinfo.value.message == error_response["error"]["message"]
+    expected_message = error_response["error"]["message"]
+    if not isinstance(expected_message, str):
+        expected_message = str(expected_message)
+    assert excinfo.value.message == expected_message
     if "data" in excinfo.value.data:
         assert excinfo.value.data["data"] == error_response["error"]["data"]
 

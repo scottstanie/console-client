@@ -121,6 +121,8 @@ def handle_error_response_and_raise(response):
             error = error["error"]
 
         message = error.get("message", error.get("Message"))
+        if message is not None and not isinstance(message, str):
+            message = str(message)
         code = error.get("code", DEFAULT_ERROR_CODE)
 
         error_data = {}
@@ -131,7 +133,7 @@ def handle_error_response_and_raise(response):
             error_data["detail"] = error["detail"]
 
     except Exception:
-        message = error
+        message = str(error) if not isinstance(error, str) else error
         code = DEFAULT_ERROR_CODE
         error_data = {}
 
